@@ -1,10 +1,8 @@
-NAME      := tcping
-BUILD_DIR := build                     # root directory for build outputs
-
-TARGET    = $(GOOS)-$(GOARCH)$(GOARM)  # target platform identifier
-BIN_DIR   = $(BUILD_DIR)/$(TARGET)     # Platform-specific binary directory
-
-VERSION   ?= dev
+NAME=tcping
+OUT_DIR=build
+TARGET=$(GOOS)-$(GOARCH)$(GOARM)
+BIN_DIR=$(OUT_DIR)/$(TARGET)
+VERSION?=dev
 
 ifeq ($(GOOS),windows)
   EXT=.exe
@@ -26,7 +24,7 @@ build: clean test
 	@echo "binary file: $(BIN_DIR)/$(NAME)$(EXT)"
 
 build-dev: clean test
-	@go build -o $(BUILD_DIR)/$(NAME)$(EXT)
+	@go build -o $(BIN_DIR)/$(NAME)$(EXT)
 	@echo "binary file: $(BIN_DIR)/$(NAME)$(EXT)"
 
 cross-build: clean test
@@ -34,19 +32,18 @@ cross-build: clean test
 	@CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags "-s -w -X main.version=$(VERSION)" -o $(BIN_DIR)/$(NAME)$(EXT)
 	@echo "binary file: $(BIN_DIR)/$(NAME)$(EXT)"
 
-release: clean test
+release:
 	@$(call check_env)
-	@mkdir -p $(BUILD_DIR)
-	@cp LICENSE $(BUILD_DIR)/
-	@cp README.md $(BUILD_DIR)/
-	@cp Examples.md $(BUILD_DIR)/
+	@mkdir -p $(BIN_DIR)
+	@cp LICENSE $(BIN_DIR)/
+	@cp README.md $(BIN_DIR)/
+	@cp Examples.md $(BIN_DIR)/
 	@CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags "-s -w -X main.version=$(VERSION)" -o $(BIN_DIR)/$(NAME)$(EXT)
-	@cd $(BUILD_DIR) ; $(PACK_CMD)
+	@cd $(OUT_DIR) ; $(PACK_CMD)
 
 test:
-	@go test -race -v -bench=. ./...
+	@go test -v -bench=. ./...
 
 clean:
 	@go clean
-	@rm -rf $(BUILD_DIR)
-	@echo "done"
+	@rm -rf $(OUT_DIR)

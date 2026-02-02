@@ -4,7 +4,6 @@ name: Build
   "push":
     "tags":
       - "v*"
-  "pull_request":
 
 jobs:
   build:
@@ -12,9 +11,9 @@ jobs:
     env:
       GO111MODULE: "on"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: '1.25.6'
 
@@ -22,19 +21,19 @@ jobs:
         run: |-
           RELEASE_VERSION="${GITHUB_REF##*/}"
           if [[ "${RELEASE_VERSION}" != v* ]]; then RELEASE_VERSION='dev'; fi
-          echo "RELEASE_VERSION=\"${RELEASE_VERSION}@${GITHUB_SHA:0:10}\"" | tee -a $GITHUB_ENV
+          echo "RELEASE_VERSION=${RELEASE_VERSION}" | tee -a $GITHUB_ENV
           go mod vendor
 
-      # Win
+      - run: make test
+      - run: make clean
+
       - run: GOOS=windows GOARCH=amd64 VERSION=${RELEASE_VERSION} make release
       - run: GOOS=windows GOARCH=arm64 VERSION=${RELEASE_VERSION} make release
       - run: GOOS=windows GOARCH=386 VERSION=${RELEASE_VERSION} make release
 
-      # MacOS
       - run: GOOS=darwin GOARCH=amd64 VERSION=${RELEASE_VERSION} make release
       - run: GOOS=darwin GOARCH=arm64 VERSION=${RELEASE_VERSION} make release
 
-      # Linux
       - run: GOOS=linux GOARCH=amd64 VERSION=${RELEASE_VERSION} make release
       - run: GOOS=linux GOARCH=arm64 VERSION=${RELEASE_VERSION} make release
 
