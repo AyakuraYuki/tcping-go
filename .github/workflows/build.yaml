@@ -68,21 +68,30 @@ jobs:
 
       - run: GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -ldflags "-s -w -X main.version=${VERSION}" -o build/tcping-${{ matrix.target }}
 
-      - uses: softprops/action-gh-release@v2
+      - uses: actions/upload-artifact@v6
         with:
-          tag_name: ${{ github.ref_name }}
-          name: "Release ${{ github.ref_name }}"
-          draft: true
-          files: build/tcping-${{ matrix.target }}
-          prerelease: ${{ contains(github.ref_name, '-rc') }}
+          name: build-${{ matrix.target }}
+          path: build/tcping-${{ matrix.target }}
 
   update-tag:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/download-artifact@v7
+        with:
+          path: build
+          merge-multiple: true
+
+      - run: ls -alh build
+
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: "Release ${{ github.ref_name }}"
           draft: false
+          files: build/tcping-*
           prerelease: ${{ contains(github.ref_name, '-rc') }}
+
+      - uses: geekyeggo/delete-artifact@v5
+        with:
+          name: build-*
