@@ -68,6 +68,9 @@ jobs:
 
       - run: GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -ldflags "-s -w -X main.version=${VERSION}" -o build/tcping-${{ matrix.target }}
 
+      - if: ${{ matrix.goos != 'windows' }}
+        run: chmod +x build/tcping-${{ matrix.target }}
+
       - uses: actions/upload-artifact@v6
         with:
           name: build-${{ matrix.target }}
