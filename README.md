@@ -18,43 +18,46 @@ Check if a desired port is reachable via TCP.
 
 ### Prebuilt Releases
 
-See the latest [Releases](https://github.com/AyakuraYuki/tcping-go/releases).
+Prebuilt releases present the following arch:
+
+- `macos_aarch64` - macOS (Apple Silicon)
+- `macos_amd64` - macOS (Intel)
+- `windows_x64` - Windows x64
+- `windows_x86` - Windows x86
+- `windows_arm` - Windows arm64
+- `linux_x86` - Linux x86
+- `linux_amd64` - Linux 64-bit
+- `linux_arm64` - Linux arm64
+
+All prebuilt disable CGO.
+
+See the [Releases](https://github.com/AyakuraYuki/tcping-go/releases) to download.
 
 ### Build from source code
 
 ```shell
-go build -o tcping main.go
-
-# Or use Makefile
 make build
+
+# or
+make build-dev
 ```
 
 ### Cross-Compilation
 
 ```shell
 # linux-amd64
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o tcping main.go
-# or
 GOOS=linux GOARCH=amd64 make cross-build
 
 # linux-arm64
-CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o tcping main.go
-# or
 GOOS=linux GOARCH=arm64 make cross-build
 
 # macOS (Apple Silicon)
-CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o tcping main.go
-# or
 GOOS=darwin GOARCH=arm64 make cross-build
 
 # macOS (Intel)
-CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o tcping main.go
-# or
 GOOS=darwin GOARCH=amd64 make cross-build
 
 # Windows AMD64
-CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o tcping.exe main.go
-# or
 GOOS=windows GOARCH=amd64 make cross-build
 ```
 

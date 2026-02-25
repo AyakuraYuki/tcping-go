@@ -52,23 +52,10 @@ jobs:
           - { goos: windows,   goarch: amd64,    target: windows_x64 }
           - { goos: windows,   goarch: "386",    target: windows_x86 }
           - { goos: windows,   goarch: arm64,    target: windows_arm }
-          # Solaris
-          - { goos: solaris,   goarch: amd64,    target: solaris_x64 }
-          # DragonFly BSD
-          - { goos: dragonfly, goarch: amd64,    target: dragonfly_x64 }
           # Linux
           - { goos: linux,     goarch: "386",    target: linux_x86 }
           - { goos: linux,     goarch: amd64,    target: linux_amd64 }
-          - { goos: linux,     goarch: arm,      target: linux_arm }
           - { goos: linux,     goarch: arm64,    target: linux_arm64 }
-          - { goos: linux,     goarch: loong64,  target: linux_loong64 }
-          - { goos: linux,     goarch: mips,     target: linux_mips }
-          - { goos: linux,     goarch: mips64,   target: linux_mips64 }
-          - { goos: linux,     goarch: mips64le, target: linux_mips64le }
-          - { goos: linux,     goarch: mipsle,   target: linux_mipsle }
-          - { goos: linux,     goarch: ppc64,    target: linux_ppc64 }
-          - { goos: linux,     goarch: ppc64le,  target: linux_ppc64le }
-          - { goos: linux,     goarch: riscv64,  target: linux_riscv64 }
 
     steps:
       - uses: actions/checkout@v6

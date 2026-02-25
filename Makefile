@@ -20,7 +20,7 @@ endef
 .PHONY: build build-dev cross-build release test clean
 
 build: clean test
-	@CGO_ENABLED=0 go build -ldflags "-s -w -X main.version=$(VERSION)" -o $(BIN_DIR)/$(NAME)$(EXT)
+	@go build -ldflags "-s -w -X main.version=$(VERSION)" -o $(BIN_DIR)/$(NAME)$(EXT)
 	@echo "binary file: $(BIN_DIR)/$(NAME)$(EXT)"
 
 build-dev: clean test
@@ -29,7 +29,7 @@ build-dev: clean test
 
 cross-build: clean test
 	@$(call check_env)
-	@CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags "-s -w -X main.version=$(VERSION)" -o $(BIN_DIR)/$(NAME)$(EXT)
+	@GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags "-s -w -X main.version=$(VERSION)" -o $(BIN_DIR)/$(NAME)$(EXT)
 	@echo "binary file: $(BIN_DIR)/$(NAME)$(EXT)"
 
 test:
