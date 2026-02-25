@@ -32,15 +32,6 @@ cross-build: clean test
 	@CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags "-s -w -X main.version=$(VERSION)" -o $(BIN_DIR)/$(NAME)$(EXT)
 	@echo "binary file: $(BIN_DIR)/$(NAME)$(EXT)"
 
-release:
-	@$(call check_env)
-	@mkdir -p $(BIN_DIR)
-	@cp LICENSE $(BIN_DIR)/
-	@cp README.md $(BIN_DIR)/
-	@cp Examples.md $(BIN_DIR)/
-	@CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags "-s -w -X main.version=$(VERSION)" -o $(BIN_DIR)/$(NAME)$(EXT)
-	@cd $(OUT_DIR) ; $(PACK_CMD)
-
 test:
 	@go test -v -bench=. ./...
 

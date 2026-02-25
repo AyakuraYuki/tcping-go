@@ -1,4 +1,4 @@
-name: Build
+name: Release
 
 "on":
   "push":
@@ -6,57 +6,83 @@ name: Build
       - "v*"
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check tag is on main
+        run: |
+          TAG_COMMIT=$(git rev-list -n 1 ${{ github.ref_name }})
+          if ! git rev-list origin/main | grep -q "$TAG_COMMIT"; then
+            echo "❌ Tag is not from main branch"
+            exit 1
+          fi
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
+      - run: go test -v -bench=. ./...
+
   build:
+    needs: check
     runs-on: ubuntu-latest
     env:
-      GO111MODULE: "on"
+      CGO_ENABLED: "0"
+      VERSION: ${{ github.ref_name }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # macOS
+          - { goos: darwin,    goarch: arm64,    target: macOS_aarch64 }
+          - { goos: darwin,    goarch: amd64,    target: macOS_amd64 }
+          # Windows
+          - { goos: windows,   goarch: amd64,    target: windows_x64 }
+          - { goos: windows,   goarch: "386",    target: windows_x86 }
+          - { goos: windows,   goarch: arm64,    target: windows_arm }
+          # Solaris
+          - { goos: solaris,   goarch: amd64,    target: solaris_x64 }
+          # DragonFly BSD
+          - { goos: dragonfly, goarch: amd64,    target: dragonfly_x64 }
+          # Linux
+          - { goos: linux,     goarch: "386",    target: linux_x86 }
+          - { goos: linux,     goarch: amd64,    target: linux_amd64 }
+          - { goos: linux,     goarch: arm,      target: linux_arm }
+          - { goos: linux,     goarch: arm64,    target: linux_arm64 }
+          - { goos: linux,     goarch: loong64,  target: linux_loong64 }
+          - { goos: linux,     goarch: mips,     target: linux_mips }
+          - { goos: linux,     goarch: mips64,   target: linux_mips64 }
+          - { goos: linux,     goarch: mips64le, target: linux_mips64le }
+          - { goos: linux,     goarch: mipsle,   target: linux_mipsle }
+          - { goos: linux,     goarch: ppc64,    target: linux_ppc64 }
+          - { goos: linux,     goarch: ppc64le,  target: linux_ppc64le }
+          - { goos: linux,     goarch: riscv64,  target: linux_riscv64 }
+          # Android
+          - { goos: android,   goarch: "386",    target: android_x86 }
+          - { goos: android,   goarch: amd64,    target: android_x64 }
+          - { goos: android,   goarch: arm,      target: android_arm }
+          - { goos: android,   goarch: arm64,    target: android_arm64 }
+
     steps:
       - uses: actions/checkout@v6
 
       - uses: actions/setup-go@v6
         with:
-          go-version: '1.25.6'
+          go-version-file: go.mod
 
-      - name: Prepare environment
-        run: |-
-          RELEASE_VERSION="${GITHUB_REF##*/}"
-          if [[ "${RELEASE_VERSION}" != v* ]]; then RELEASE_VERSION='dev'; fi
-          echo "RELEASE_VERSION=${RELEASE_VERSION}" | tee -a $GITHUB_ENV
-          go mod vendor
+      - run: mkdir -p build
 
-      - run: make test
-      - run: make clean
+      - run: GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -ldflags "-s -w -X main.version=${VERSION}" -o build/tcping-${{ matrix.target }}
 
-      - run: GOOS=windows GOARCH=amd64 VERSION=${RELEASE_VERSION} make release
-      - run: GOOS=windows GOARCH=arm64 VERSION=${RELEASE_VERSION} make release
-      - run: GOOS=windows GOARCH=386 VERSION=${RELEASE_VERSION} make release
-
-      - run: GOOS=darwin GOARCH=amd64 VERSION=${RELEASE_VERSION} make release
-      - run: GOOS=darwin GOARCH=arm64 VERSION=${RELEASE_VERSION} make release
-
-      - run: GOOS=linux GOARCH=amd64 VERSION=${RELEASE_VERSION} make release
-      - run: GOOS=linux GOARCH=arm64 VERSION=${RELEASE_VERSION} make release
-
-      - run: ls -l build/tcping-*
-
-      - name: Create release
-        if: startsWith(github.ref, 'refs/tags/v')
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ github.ref_name }}
+          name: "Release ${{ github.ref_name }}"
           draft: false
-          prerelease: false
-
-      - name: Upload
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: xresloader/upload-to-github-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          file: "build/tcping-*.tar.gz;build/tcping-*.zip"
-          tags: true
-          draft: false
+          files: build/tcping-${{ matrix.target }}
+          prerelease: ${{ contains(github.ref_name, '-rc') }}
