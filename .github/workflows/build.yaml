@@ -49,9 +49,9 @@ jobs:
           - { goos: darwin,    goarch: arm64,    target: macos_aarch64 }
           - { goos: darwin,    goarch: amd64,    target: macos_amd64 }
           # Windows
-          - { goos: windows,   goarch: amd64,    target: windows_x64 }
-          - { goos: windows,   goarch: "386",    target: windows_x86 }
-          - { goos: windows,   goarch: arm64,    target: windows_arm }
+          - { goos: windows,   goarch: amd64,    target: windows_x64.exe }
+          - { goos: windows,   goarch: "386",    target: windows_x86.exe }
+          - { goos: windows,   goarch: arm64,    target: windows_arm.exe }
           # Linux
           - { goos: linux,     goarch: "386",    target: linux_x86 }
           - { goos: linux,     goarch: amd64,    target: linux_amd64 }
@@ -81,8 +81,6 @@ jobs:
         with:
           path: build
           merge-multiple: true
-
-      - run: ls -alh build
 
       - uses: softprops/action-gh-release@v2
         with:

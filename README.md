@@ -31,7 +31,7 @@ Prebuilt releases present the following arch:
 
 All prebuilt disable CGO.
 
-See the [Releases](https://github.com/AyakuraYuki/tcping-go/releases) to download.
+See the [Releases](https://github.com/AyakuraYuki/tcping-go/releases) to download and rename to `tcping` (or `tcping.exe` on Windows).
 
 ### Build from source code
 
