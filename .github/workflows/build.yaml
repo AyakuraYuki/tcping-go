@@ -46,8 +46,8 @@ jobs:
       matrix:
         include:
           # macOS
-          - { goos: darwin,  goarch: arm64, os: macos-latest, target: macos_aarch64 }
-          - { goos: darwin,  goarch: amd64, os: macos-latest, target: macos_amd64 }
+          - { goos: darwin,  goarch: arm64, os: macos-latest,  target: macos_aarch64 }
+          - { goos: darwin,  goarch: amd64, os: macos-latest,  target: macos_amd64 }
           # Windows
           - { goos: windows, goarch: amd64, os: ubuntu-latest, target: windows_x64.exe }
           - { goos: windows, goarch: "386", os: ubuntu-latest, target: windows_x86.exe }
@@ -70,9 +70,6 @@ jobs:
 
       - if: ${{ matrix.goos != 'windows' }}
         run: chmod +x build/tcping-${{ matrix.target }}
-
-      - if: ${{ matrix.goos == 'darwin' }}
-        run: codesign --force --deep --sign build/tcping-${{ matrix.target }}
 
       - uses: actions/upload-artifact@v6
         with:
