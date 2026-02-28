@@ -36,7 +36,7 @@ jobs:
 
   build:
     needs: check
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     env:
       CGO_ENABLED: "0"
       VERSION: ${{ github.ref_name }}
@@ -46,16 +46,16 @@ jobs:
       matrix:
         include:
           # macOS
-          - { goos: darwin,    goarch: arm64,    target: macos_aarch64 }
-          - { goos: darwin,    goarch: amd64,    target: macos_amd64 }
+          - { goos: darwin,  goarch: arm64, os: macos-latest, target: macos_aarch64 }
+          - { goos: darwin,  goarch: amd64, os: macos-latest, target: macos_amd64 }
           # Windows
-          - { goos: windows,   goarch: amd64,    target: windows_x64.exe }
-          - { goos: windows,   goarch: "386",    target: windows_x86.exe }
-          - { goos: windows,   goarch: arm64,    target: windows_arm.exe }
+          - { goos: windows, goarch: amd64, os: ubuntu-latest, target: windows_x64.exe }
+          - { goos: windows, goarch: "386", os: ubuntu-latest, target: windows_x86.exe }
+          - { goos: windows, goarch: arm64, os: ubuntu-latest, target: windows_arm.exe }
           # Linux
-          - { goos: linux,     goarch: "386",    target: linux_x86 }
-          - { goos: linux,     goarch: amd64,    target: linux_amd64 }
-          - { goos: linux,     goarch: arm64,    target: linux_arm64 }
+          - { goos: linux,   goarch: "386", os: ubuntu-latest, target: linux_x86 }
+          - { goos: linux,   goarch: amd64, os: ubuntu-latest, target: linux_amd64 }
+          - { goos: linux,   goarch: arm64, os: ubuntu-latest, target: linux_arm64 }
 
     steps:
       - uses: actions/checkout@v6
@@ -70,6 +70,9 @@ jobs:
 
       - if: ${{ matrix.goos != 'windows' }}
         run: chmod +x build/tcping-${{ matrix.target }}
+
+      - if: ${{ matrix.goos == 'darwin' }}
+        run: codesign --force --deep --sign build/tcping-${{ matrix.target }}
 
       - uses: actions/upload-artifact@v6
         with:
